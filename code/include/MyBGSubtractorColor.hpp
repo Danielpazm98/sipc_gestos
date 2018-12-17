@@ -23,7 +23,9 @@ public:
 
 
 private:
+		//Valores inferiores y superiores de cada componente HLS
 	int h_low,h_up,l_low,l_up,s_low,s_up;
+		//Vectores que contendrán los int anteriormente definidos.
 	std::vector<int> lower;
 	std::vector<int> upper;
 

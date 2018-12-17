@@ -30,6 +30,10 @@ MyBGSubtractorColor::MyBGSubtractorColor(VideoCapture vc) {
 	s_low = 80;
 	s_up = 80;
 
+	lower = {h_low, l_low, s_low};
+	upper = {h_up, l_up, s_up};
+
+
 	namedWindow("Trackbars");
 
 	createTrackbar("H low:", "Trackbars", &h_low, 100, &MyBGSubtractorColor::Trackbar_func);
@@ -53,10 +57,11 @@ void MyBGSubtractorColor::LearnModel() {
 
 
 
-
+		//Creas los frames que vas a usar, y un vector de puntos, que serán las posiciones de los sample.
 	Mat frame, tmp_frame, hls_frame;
 	std::vector<cv::Point> samples_positions;
 
+		//Se captura el frame
 	cap >> frame;
 
 	//almacenamos las posiciones de las esquinas de los cuadrados
@@ -77,8 +82,7 @@ void MyBGSubtractorColor::LearnModel() {
 
 		frame.copyTo(tmp_frame);
 
-		//dibujar los cuadrados
-
+			//dibujar los cuadrados
 		for (int i = 0; i < max_samples; i++) {
 			rectangle(tmp_frame, Rect(samples_positions[i].x, samples_positions[i].y,
 				      SAMPLE_SIZE, SAMPLE_SIZE), Scalar(0, 255, 0), 2);
@@ -100,8 +104,10 @@ void MyBGSubtractorColor::LearnModel() {
         // almacenar las medias en la variable means
         // ...
 
+				//Pasa el frame de BGR a HLS
 			cvtColor(frame, hls_frame, CV_BGR2HLS);
 
+				//Para todas las samples, crea una media de color y la almacena en el vector de medias.
 			for (int i = 0; i < max_samples; i++) {
 				Mat roi = hls_frame(Rect(samples_positions[i].x, samples_positions[i].y, SAMPLE_SIZE, SAMPLE_SIZE));
 				means[i] = mean(roi);
@@ -119,19 +125,28 @@ void  MyBGSubtractorColor::ObtainBGMask(cv::Mat frame, cv::Mat &bgmask) {
         // obtener la máscara final con el fondo eliminado
         //...
 
-				Mat tmp_frame, hls_frame;
-				cvtColor(frame, hls_frame, CV_BGR2HLS);
+				//Creo un frame temportal, y otro, en el que pasaré el frame recogido a HLS.
+			Mat tmp_frame, hls_frame;
+			cvtColor(frame, hls_frame, CV_BGR2HLS);
 
-
-			//vector<int> lower{h_low, l_low, s_low};
-			//vector<int> upper{h_up, l_up, s_up};
-
+				/*Actualizo los valores del vector de límites por debajo y por encima, puesto que pueden ser modificados
+				Con los trackbar*/
 			lower = {h_low, l_low, s_low};
 			upper = {h_up, l_up, s_up};
 
+				//Creo un acumulador, con las dimensiones del frame recogido y un static int como valor. Lo pongo a 0.
 			Mat acc = Mat(frame.rows, frame.cols, CV_8U);
 			acc.setTo(Scalar(0));
 
+				/*
+					Recorro los vectores. lower_bounds tiene tantas posiciones como samples máximos hayan, y cada posición es un escalar.
+					Actualizo lower_bound con los valores de las medias menos el límite inferior general.
+					Actualizo upper_bound con los valores de las medias mas el límite superior general.
+					El valor tiene que estar comprendido entre 0 y 255. Si se pasa, se actualiza a uno de esos dos valores.
+
+					Cada vez que se ha actualizado una posición del vector, se comprueba si está en rango, y el valor se pasa al frame temportal
+					Tras eso, se suma al acumulador, y se copia al bg_mask, que luego será mostrado.
+				*/
 			for(int i = 0; i < max_samples; i++){
 				for(int j = 0; j < 3; j++){
 					lower_bounds[i][j] = means[i][j] - lower[j];
