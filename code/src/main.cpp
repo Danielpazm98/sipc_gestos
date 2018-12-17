@@ -48,8 +48,10 @@ int main(int argc, char** argv)
 	namedWindow("Fondo");
 
         // creamos el objeto para la substracci�n de fondo
-	MyBGSubtractorColor pepe(cap);
-	pepe.LearnModel();
+	MyBGSubtractorColor bg_colorless(cap);
+	bg_colorless.LearnModel();
+
+	HandGesture gestures;
 
 	// creamos el objeto para el reconocimiento de gestos
 
@@ -68,23 +70,40 @@ int main(int argc, char** argv)
 		int c = cvWaitKey(40);
 		if ((char)c == 'q') break;
 
-		pepe.ObtainBGMask(frame, bgmask);
 
-		imshow("Fondo", bgmask);
-		// obtenemos la m�scara del fondo con el frame actual
-
+		imshow("Reconocimiento", frame);
+		bg_colorless.ObtainBGMask(frame, bgmask);
                 // CODIGO 2.1
                 // limpiar la m�scara del fondo de ruido
                 //...
 
+								//medianBlur(bgmask, bgmask, 5);
+								Mat element = getStructuringElement(MORPH_RECT, Size(2 * 1 + 1, 2 * 1 + 1), Point(1, 1));
+								dilate(bgmask, bgmask, element);
+
+								element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
+								erode(bgmask, bgmask, element);
+
+
+								element = getStructuringElement(MORPH_RECT, Size(2 * 1 + 1, 2 * 1 + 1), Point(1, 1));
+								erode(bgmask, bgmask, element);
+
+								element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
+								dilate(bgmask, bgmask, element);
+
 
 		// deteccion de las caracter�sticas de la mano
+							gestures.FeaturesDetection(bgmask, frame);
 
-                // mostramos el resultado de la sobstracci�n de fondo
+
+              // mostramos el resultado de la sobstracci�n de fondo
+								imshow("Fondo", bgmask);
 
                 // mostramos el resultado del reconocimento de gestos
 
-		imshow("Reconocimiento", frame);
+								imshow("Gestos", frame);
+
+		// obtenemos la m�scara del fondo con el frame actual
 
 
 	}
