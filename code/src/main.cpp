@@ -44,8 +44,8 @@ int main(int argc, char** argv)
 
 	// Creamos las ventanas que vamos a usar en la aplicaci�n
 
-	namedWindow("Reconocimiento");
-	namedWindow("Fondo");
+	//namedWindow("Reconocimiento");
+	//namedWindow("Fondo");
 
         // creamos el objeto para la substracci�n de fondo
 	MyBGSubtractorColor bg_colorless(cap);
@@ -78,17 +78,14 @@ int main(int argc, char** argv)
                 //...
 
 								//medianBlur(bgmask, bgmask, 5);
-								Mat element = getStructuringElement(MORPH_RECT, Size(2 * 1 + 1, 2 * 1 + 1), Point(1, 1));
+								Mat element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
 								dilate(bgmask, bgmask, element);
 
 								element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
 								erode(bgmask, bgmask, element);
 
 
-								element = getStructuringElement(MORPH_RECT, Size(2 * 1 + 1, 2 * 1 + 1), Point(1, 1));
-								erode(bgmask, bgmask, element);
-
-								element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
+								element = getStructuringElement(MORPH_RECT, Size(3 * 2 + 1, 3 * 2 + 1), Point(3, 3));
 								dilate(bgmask, bgmask, element);
 
 

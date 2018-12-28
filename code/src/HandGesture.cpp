@@ -44,7 +44,7 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
         // CODIGO 3.1
         // detección del contorno de la mano y selección del contorno más largo
         //...
-				findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+				findContours(temp_mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
 
         // pintar el contorno
@@ -53,7 +53,7 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
 				index = 0;
 
 				for(int i = 1; i < contours.size(); i++){
-					if(contours[i].size() > contours[i-1].size())
+					if(contours[i].size() >= contours[i-1].size())
 						index = i;
 				}
 
