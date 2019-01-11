@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	//Abrimos la webcam
 
 	VideoCapture cap;
-	cap.open(0);
+	cap.open(2);
 	if (!cap.isOpened())
 	{
 		printf("\nNo se puede abrir la c�mara\n");
@@ -58,6 +58,8 @@ int main(int argc, char** argv)
 	// iniciamos el proceso de obtenci�n del modelo del fondo
 
 
+	vector<Point> trace;
+
 	for (;;)
 	{
 		cap >> frame;
@@ -76,8 +78,8 @@ int main(int argc, char** argv)
                 // CODIGO 2.1
                 // limpiar la m�scara del fondo de ruido
                 //...
+								medianBlur(bgmask, bgmask, 5);
 
-								//medianBlur(bgmask, bgmask, 5);
 								Mat element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
 								dilate(bgmask, bgmask, element);
 
@@ -90,7 +92,7 @@ int main(int argc, char** argv)
 
 
 		// deteccion de las caracter�sticas de la mano
-							gestures.FeaturesDetection(bgmask, frame);
+							gestures.FeaturesDetection(bgmask, frame, trace);
 
 
               // mostramos el resultado de la sobstracci�n de fondo

@@ -26,8 +26,8 @@ MyBGSubtractorColor::MyBGSubtractorColor(VideoCapture vc) {
 	h_low = 24;
   h_up = 13;
 	l_low = 8;
-	l_up = 5;
-	s_low = 0;
+	l_up = 20;
+	s_low = 20;
 	s_up = 40;
 
 	lower = {h_low, l_low, s_low};

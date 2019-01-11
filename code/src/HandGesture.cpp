@@ -13,7 +13,6 @@ using namespace cv;
 using namespace std;
 
 HandGesture::HandGesture() {
-
 }
 
 
@@ -34,13 +33,17 @@ double HandGesture::getAngle(Point s, Point e, Point f) {
 	if (angle < -CV_PI) angle += 2 * CV_PI;
 	return (angle * 180.0/CV_PI);
 }
-void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
+
+
+
+void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &trace) {
 
 	vector<vector<Point> > contours;
 	Mat temp_mask;
 	mask.copyTo(temp_mask);
 	int index = -1;
 
+				circle(temp_mask, Point(10,10), 5, Scalar(255), 3);
         // CODIGO 3.1
         // detección del contorno de la mano y selección del contorno más largo
         //...
@@ -50,11 +53,15 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
         // pintar el contorno
         //...
 				//vector<Point> biggest = contours[0];
+
 				index = 0;
+				vector<Point> max_contour = contours[0];
 
 				for(int i = 1; i < contours.size(); i++){
-					if(contours[i].size() >= contours[i-1].size())
+					if(contourArea(contours[i]) > contourArea(max_contour)){
+						max_contour = contours[i];
 						index = i;
+					}
 				}
 
 				drawContours(output_img, contours, index, cv::Scalar(255, 0, 0), 2, 8, vector<Vec4i>(), 0, Point());
@@ -81,6 +88,9 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
 	vector<Vec4i> defects;
 	convexityDefects(contours[index], hull, defects);
 
+		Rect rect = boundingRect(contours[index]);
+		//vector<Point> trace;
+		Point to_trace;
 
 		int cont = 0;
 		for (int i = 0; i < defects.size(); i++) {
@@ -90,16 +100,39 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img) {
 			float depth = (float)defects[i][3] / 256.0;
 			double angle = getAngle(s, e, f);
 
-                        // CODIGO 3.2
-                        // filtrar y mostrar los defectos de convexidad
-                        //...
+                // CODIGO 3.2
+                // filtrar y mostrar los defectos de convexidad
+				        //...
+					if((depth > (rect.height*0.2)) && (angle < 110)){
+						cont++;
+						circle(output_img, f, 5, Scalar(0,255,0),3);
+						if(cont == 1)
+							to_trace = f;
+					}
 
-								if((depth > 50) && (angle < 110))
-								circle(output_img, f, 5, Scalar(0,255,0),3);
+      }
 
-												//función circle. Buscar en la documentación de opencv
+					if((rect.height / rect.width < 1.2) && (cont == 0))
+						cont = 0;
+					else
+						cont++;
 
-                }
+					const string aux = to_string(cont);
+					putText(output_img, aux, Point(30,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,0), 1, 8, false);
+								//función circle. Buscar en la documentación de opencv
+
+
+				if(cont == 2)
+					trace.push_back(to_trace);
+				else
+					trace.clear();
+
+				const string trace_sz = to_string(trace.size());
+				putText(output_img, trace_sz, Point(30,100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,0), 1, 8, false);
+
+					for(int i = 0; i < trace.size(); i++)
+						circle(output_img, trace[i], 5, Scalar(0,0,255),3);
+
 
 
 }
