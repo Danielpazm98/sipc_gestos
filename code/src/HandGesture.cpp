@@ -43,36 +43,36 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 	mask.copyTo(temp_mask);
 	int index = -1;
 
-				circle(temp_mask, Point(10,10), 5, Scalar(255), 3);
+			circle(temp_mask, Point(10,10), 5, Scalar(255), 3);
         // CODIGO 3.1
         // detección del contorno de la mano y selección del contorno más largo
         //...
-				findContours(temp_mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-
+			findContours(temp_mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
         // pintar el contorno
         //...
 				//vector<Point> biggest = contours[0];
 
-				index = 0;
-				vector<Point> max_contour = contours[0];
+			index = 0;
+			vector<Point> max_contour = contours[0];
 
-				for(int i = 1; i < contours.size(); i++){
-					if(contourArea(contours[i]) > contourArea(max_contour)){
-						max_contour = contours[i];
-						index = i;
-					}
+					//Busca el mayor contorno
+			for(int i = 1; i < contours.size(); i++){
+				if(contourArea(contours[i]) > contourArea(max_contour)){
+					max_contour = contours[i];
+					index = i;
 				}
+			}
+						//Escribe en azul el mayor contorno
+			drawContours(output_img, contours, index, cv::Scalar(255, 0, 0), 2, 8, vector<Vec4i>(), 0, Point());
 
-				drawContours(output_img, contours, index, cv::Scalar(255, 0, 0), 2, 8, vector<Vec4i>(), 0, Point());
-
-	//obtener el convex hull
+				//obtener el convex hull
 	vector<int> hull;
 	convexHull(contours[index],hull);
 
 
 
-	// pintar el convex hull(temp_mask
+		// pintar el convex hull
 	Point pt0 = contours[index][hull[hull.size()-1]];
 	for (int i = 0; i < hull.size(); i++)
 	{
@@ -81,51 +81,57 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 		pt0 = pt;
 	}
 
-        //obtener los defectos de convexidad
+      //obtener los defectos de convexidad
 	vector<Vec4i> defects;
 	convexityDefects(contours[index], hull, defects);
+			//Crea un rectángulo con el contorno de la mano
+	Rect rect = boundingRect(contours[index]);
+				//Pinta el rectángulo
+	//rectangle(output_img, rect, Scalar(255,255,255), 1, 8, 0);
 
-		Rect rect = boundingRect(contours[index]);
+			//Punto a insertar en el historial, para dibujar
+	Point to_trace;
+			//Punto actual, para comparar con el anterior. Es el centro del rectángulo
+	Point a_p(((rect.width / 2) + rect.x), (rect.height / 2) + rect.y);
 
-		//rectangle(output_img, rect, Scalar(255,255,255), 1, 8, 0);
+	int cont = 0;
 
-		Point to_trace;
-		Point aux_p(rect.x, rect.y);
-		Point a_p(((rect.width / 2) + aux_p.x), (rect.height / 2) + aux_p.y);
+	for (int i = 0; i < defects.size(); i++) {		//Para cada defecto de convexidad
 
-		int cont = 0;
-		for (int i = 0; i < defects.size(); i++) {
-			Point s = contours[index][defects[i][0]];		//Punto inicial
-			Point e = contours[index][defects[i][1]];		//Punto final
-			Point f = contours[index][defects[i][2]];		//Punto más lejano
-			float depth = (float)defects[i][3] / 256.0;
-			double angle = getAngle(s, e, f);
+		Point s = contours[index][defects[i][0]];		//Punto inicial
+		Point e = contours[index][defects[i][1]];		//Punto final
+		Point f = contours[index][defects[i][2]];		//Punto más lejano
+		float depth = (float)defects[i][3] / 256.0;	//Profundidad
+		double angle = getAngle(s, e, f);						//Ángulo
 
-                // CODIGO 3.2
-                // filtrar y mostrar los defectos de convexidad
-				        //...
-					if((depth > (rect.height*0.2)) && (angle < 110)){
-						cont++;
-						circle(output_img, f, 5, Scalar(0,255,0),3);
-						if(cont == 1)
-							to_trace = f;
-					}
-      }
+              // CODIGO 3.2
+              // filtrar y mostrar los defectos de convexidad
+			        //...
 
-					if((rect.height / rect.width < 1.2) && (cont == 0))
-						cont = 0;
-					else
-						cont++;
+			if((depth > (rect.height*0.2)) && (angle < 110)){			//Si la profundidad es mayor al 20% y el ángulo es menor a 110º
+				cont++;			//Sumas "dedo"
+				circle(output_img, f, 5, Scalar(0,255,0),3);				//Colocas un círculo en el defecto de convexidad del dedo
+				if(cont == 1)
+					to_trace = f;			//Si ha habido sólo 1 defecto admitido.
+			}
+  }
 
-					const string aux = to_string(cont);
-					putText(output_img, aux, Point(30,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,0), 1, 8, false);
+				if((rect.height / rect.width < 1.2) && (cont == 0))		//Comprueba si tienes 0 dedos levantados.
+					cont = 0;
+				else
+					cont++;
+
+					//Escribe la cantidad de dedos levantados
+				const string aux = to_string(cont);
+				putText(output_img, aux, Point(30,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,0), 1, 8, false);
 								//función circle. Buscar en la documentación de opencv
 
-				if(cont == 3){
 
+				if(cont == 3){		//Si tienes 3 dedos levantados, te cambia el color (rojo, amarillo, cian)
 					Scalar aux1(0,255,255);	//Amarillo
-					Scalar aux2(255,255,0); //Azul
+					Scalar aux2(255,255,0); //Cian
 					Scalar aux3(0,0,255);		//Rojo
+
 					if(color == aux3){
 						color = Scalar(255,255,0);
 					}
@@ -138,21 +144,23 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 
 				}
 
-
-				if(cont == 2)
+				if(cont == 2)				//Si tienes 2 dedos levantados, pones el punto en el historial de dibujo
 					trace.push_back(to_trace);
-				else
+				else if(cont == 5)
 					trace.clear();
 
 
+						//Escribe el número de puntos que tiene la traza
 				const string trace_sz = to_string(trace.size());
 				putText(output_img, trace_sz, Point(30,100), FONT_HERSHEY_SIMPLEX, 1, color, 1, 8, false);
 
-					for(int i = 0; i < trace.size(); i++)
-						circle(output_img, trace[i], 5, color,3);
+						//Dibuja la traza
+				for(int i = 0; i < trace.size(); i++)
+					circle(output_img, trace[i], 5, color,3);
 
+						//Comprueba cuánto se ha movido la mano desde el frame anterior, y si es más de 10px, te avisa de que te estés quieto
 				if((abs(p_p.y - a_p.y) > 10) || (abs(p_p.y - a_p.y) > 10))
 					putText(output_img, "Estate quieto", Point(100,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
 
-				p_p = a_p;
+				p_p = a_p;		//Coloca el piel actual como pixel anterior
 }

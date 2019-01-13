@@ -58,9 +58,9 @@ int main(int argc, char** argv)
 	// iniciamos el proceso de obtenci�n del modelo del fondo
 
 
-	vector<Point> trace;
-	Scalar color(0,255,255);
-	Point p_p(100,100);
+	vector<Point> trace;			//Historial de puntos, para dibujar
+	Scalar color(0,255,255);	//Color de la traza
+	Point p_p(100,100);				//Punto central previo, para detectar movimiento
 
 	for (;;)
 	{
@@ -80,15 +80,18 @@ int main(int argc, char** argv)
                 // CODIGO 2.1
                 // limpiar la m�scara del fondo de ruido
                 //...
+										//Filtro de la media
 								medianBlur(bgmask, bgmask, 5);
 
+										//Dilata los puntos blancos
 								Mat element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
 								dilate(bgmask, bgmask, element);
 
+										//Erosiona los puntos blancos según el contorno
 								element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
 								erode(bgmask, bgmask, element);
 
-
+										//Dilata los puntos blancos
 								element = getStructuringElement(MORPH_RECT, Size(3 * 2 + 1, 3 * 2 + 1), Point(3, 3));
 								dilate(bgmask, bgmask, element);
 
