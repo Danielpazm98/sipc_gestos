@@ -36,7 +36,7 @@ double HandGesture::getAngle(Point s, Point e, Point f) {
 
 
 
-void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &trace) {
+void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &trace, Scalar &color, Point &p_p) {
 
 	vector<vector<Point> > contours;
 	Mat temp_mask;
@@ -66,9 +66,6 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 
 				drawContours(output_img, contours, index, cv::Scalar(255, 0, 0), 2, 8, vector<Vec4i>(), 0, Point());
 
-
-
-
 	//obtener el convex hull
 	vector<int> hull;
 	convexHull(contours[index],hull);
@@ -89,8 +86,12 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 	convexityDefects(contours[index], hull, defects);
 
 		Rect rect = boundingRect(contours[index]);
-		//vector<Point> trace;
+
+		//rectangle(output_img, rect, Scalar(255,255,255), 1, 8, 0);
+
 		Point to_trace;
+		Point aux_p(rect.x, rect.y);
+		Point a_p(((rect.width / 2) + aux_p.x), (rect.height / 2) + aux_p.y);
 
 		int cont = 0;
 		for (int i = 0; i < defects.size(); i++) {
@@ -109,7 +110,6 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 						if(cont == 1)
 							to_trace = f;
 					}
-
       }
 
 					if((rect.height / rect.width < 1.2) && (cont == 0))
@@ -121,18 +121,38 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 					putText(output_img, aux, Point(30,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,0), 1, 8, false);
 								//función circle. Buscar en la documentación de opencv
 
+				if(cont == 3){
+
+					Scalar aux1(0,255,255);	//Amarillo
+					Scalar aux2(255,255,0); //Azul
+					Scalar aux3(0,0,255);		//Rojo
+					if(color == aux3){
+						color = Scalar(255,255,0);
+					}
+					else if(color == aux2){
+						color = Scalar(0,255,255);
+					}
+					else if(color == aux1){
+						color = Scalar(0,0,255);
+					}
+
+				}
+
 
 				if(cont == 2)
 					trace.push_back(to_trace);
 				else
 					trace.clear();
 
+
 				const string trace_sz = to_string(trace.size());
-				putText(output_img, trace_sz, Point(30,100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,0), 1, 8, false);
+				putText(output_img, trace_sz, Point(30,100), FONT_HERSHEY_SIMPLEX, 1, color, 1, 8, false);
 
 					for(int i = 0; i < trace.size(); i++)
-						circle(output_img, trace[i], 5, Scalar(0,0,255),3);
+						circle(output_img, trace[i], 5, color,3);
 
+				if((abs(p_p.y - a_p.y) > 10) || (abs(p_p.y - a_p.y) > 10))
+					putText(output_img, "Estate quieto", Point(100,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
 
-
+				p_p = a_p;
 }

@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	//Abrimos la webcam
 
 	VideoCapture cap;
-	cap.open(2);
+	cap.open(0);
 	if (!cap.isOpened())
 	{
 		printf("\nNo se puede abrir la c�mara\n");
@@ -59,6 +59,8 @@ int main(int argc, char** argv)
 
 
 	vector<Point> trace;
+	Scalar color(0,255,255);
+	Point p_p(100,100);
 
 	for (;;)
 	{
@@ -73,7 +75,7 @@ int main(int argc, char** argv)
 		if ((char)c == 'q') break;
 
 
-		imshow("Reconocimiento", frame);
+		//imshow("Reconocimiento", frame);
 		bg_colorless.ObtainBGMask(frame, bgmask);
                 // CODIGO 2.1
                 // limpiar la m�scara del fondo de ruido
@@ -92,7 +94,7 @@ int main(int argc, char** argv)
 
 
 		// deteccion de las caracter�sticas de la mano
-							gestures.FeaturesDetection(bgmask, frame, trace);
+								gestures.FeaturesDetection(bgmask, frame, trace, color, p_p);
 
 
               // mostramos el resultado de la sobstracci�n de fondo

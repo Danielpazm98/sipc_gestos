@@ -13,7 +13,7 @@ class HandGesture {
 
 public:
 	HandGesture();
-	void FeaturesDetection(cv::Mat mask, cv::Mat output_img, std::vector<cv::Point> &trace);
+	void FeaturesDetection(cv::Mat mask, cv::Mat output_img, std::vector<cv::Point> &trace, cv::Scalar &color, cv::Point &p_p);
 
 
 private:
