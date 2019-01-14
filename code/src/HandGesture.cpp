@@ -36,7 +36,7 @@ double HandGesture::getAngle(Point s, Point e, Point f) {
 
 
 
-void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &trace*/ 	vector<pair<Point, Scalar> > &trace , Scalar &color, Point &p_p, int &i, int &j, int &k, bool &opt) {
+void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<pair<Point, Scalar> > &trace , Scalar &color, Point &p_p, int &i, int &j, int &k, bool &opt) {
 
 	vector<vector<Point> > contours;
 	Mat temp_mask;
@@ -201,7 +201,6 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &t
 				}
 
 
-
 				to_trace.second = color;
 				if(cont == 2)				//Si tienes 2 dedos levantados, pones el punto en el historial de dibujo
 					trace.push_back(to_trace);
@@ -218,8 +217,8 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &t
 					circle(output_img, trace[i].first, 5, trace[i].second, 3);
 
 						//Comprueba cuánto se ha movido la mano desde el frame anterior, y si es más de 10px, te avisa de que te estés quieto
-				if((abs(p_p.y - a_p.y) > 10) || (abs(p_p.y - a_p.y) > 10))
-					putText(output_img, "Estate quieto", Point(200,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
+				if((abs(p_p.x - a_p.x) > 10) || (abs(p_p.y - a_p.y) > 10))
+					putText(output_img, "Estate quieto", Point(100,100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
 
 				p_p = a_p;		//Coloca el piel actual como pixel anterior
 }

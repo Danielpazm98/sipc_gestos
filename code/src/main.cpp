@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	//Abrimos la webcam
 
 	VideoCapture cap;
-	cap.open(2);
+	cap.open(0);
 	if (!cap.isOpened())
 	{
 		printf("\nNo se puede abrir la c�mara\n");
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 								erode(bgmask, bgmask, element);
 
 										//Dilata los puntos blancos
-								element = getStructuringElement(MORPH_RECT, Size(4 * 2 + 1, 4 * 2 + 1), Point(4, 4));
+								element = getStructuringElement(MORPH_RECT, Size(5 * 2 + 1, 5 * 2 + 1), Point(5, 5));
 								dilate(bgmask, bgmask, element);
 
 
