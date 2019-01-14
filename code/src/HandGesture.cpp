@@ -36,7 +36,7 @@ double HandGesture::getAngle(Point s, Point e, Point f) {
 
 
 
-void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &trace, Scalar &color, Point &p_p) {
+void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &trace*/ 	vector<pair<Point, Scalar> > &trace , Scalar &color, Point &p_p, int &i, int &j, int &k, bool &opt) {
 
 	vector<vector<Point> > contours;
 	Mat temp_mask;
@@ -90,12 +90,12 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 	//rectangle(output_img, rect, Scalar(255,255,255), 1, 8, 0);
 
 			//Punto a insertar en el historial, para dibujar
-	Point to_trace;
+	//Point to_trace;
+	pair<Point, Scalar> to_trace;
 			//Punto actual, para comparar con el anterior. Es el centro del rectángulo
 	Point a_p(((rect.width / 2) + rect.x), (rect.height / 2) + rect.y);
 
 	int cont = 0;
-
 	for (int i = 0; i < defects.size(); i++) {		//Para cada defecto de convexidad
 
 		Point s = contours[index][defects[i][0]];		//Punto inicial
@@ -112,7 +112,7 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 				cont++;			//Sumas "dedo"
 				circle(output_img, f, 5, Scalar(0,255,0),3);				//Colocas un círculo en el defecto de convexidad del dedo
 				if(cont == 1)
-					to_trace = f;			//Si ha habido sólo 1 defecto admitido.
+					to_trace.first = f;			//Si ha habido sólo 1 defecto admitido.
 			}
   }
 
@@ -127,23 +127,56 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 								//función circle. Buscar en la documentación de opencv
 
 
-				if(cont == 3){		//Si tienes 3 dedos levantados, te cambia el color (rojo, amarillo, cian)
+				if(cont == 4){
+					if(opt == 0)
+						opt = 1;
+					else
+						opt = 0;
+				}
+
+				const string mode = to_string(opt);
+				putText(output_img, mode, Point(200,10), FONT_HERSHEY_SIMPLEX, 1, Scalar(255,255,255), 1, 8, false);
+
+				if((cont == 3) && opt == 0){		//Si tienes 3 dedos levantados, te cambia el color (rojo, amarillo, cian)
 					Scalar aux1(0,255,255);	//Amarillo
 					Scalar aux2(255,255,0); //Cian
 					Scalar aux3(0,0,255);		//Rojo
 
-					if(color == aux3){
-						color = Scalar(255,255,0);
-					}
-					else if(color == aux2){
-						color = Scalar(0,255,255);
-					}
-					else if(color == aux1){
-						color = Scalar(0,0,255);
-					}
 
+					if((i == 0) && (j == 0)){
+						color = Scalar(255,255,0);
+						//to_trace.second = Scalar(255,255,0);
+					}
+					else if(i == 0){
+						color = Scalar(0,255,255);
+						//to_trace.second = Scalar(0,255,255);
+					}
+					else{
+						color = Scalar(0,0,255);
+						//to_trace.second = Scalar(0,0,255);
+					}
 				}
 
+
+
+				else if(opt == 1){
+						if(k < 245)
+							k = k + 10;
+						else if((j < 245) && (k > 240))
+							j = j + 10;
+						else if((i < 245) && (j > 240) && (k > 240))
+							i = i + 10;
+						else if ((i > 240) && (j > 240) && (k > 240)){
+							i = 0;
+							j = 0;
+							k = 0;
+						}
+						color = Scalar(i,j,k);
+				}
+
+
+
+				to_trace.second = color;
 				if(cont == 2)				//Si tienes 2 dedos levantados, pones el punto en el historial de dibujo
 					trace.push_back(to_trace);
 				else if(cont == 5)
@@ -152,11 +185,11 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, vector<Point> &tra
 
 						//Escribe el número de puntos que tiene la traza
 				const string trace_sz = to_string(trace.size());
-				putText(output_img, trace_sz, Point(30,100), FONT_HERSHEY_SIMPLEX, 1, color, 1, 8, false);
+				putText(output_img, trace_sz, Point(30,100), FONT_HERSHEY_SIMPLEX, 1, Scalar(255,255,255), 1, 8, false);
 
 						//Dibuja la traza
 				for(int i = 0; i < trace.size(); i++)
-					circle(output_img, trace[i], 5, color,3);
+					circle(output_img, trace[i].first, 5, trace[i].second, 3);
 
 						//Comprueba cuánto se ha movido la mano desde el frame anterior, y si es más de 10px, te avisa de que te estés quieto
 				if((abs(p_p.y - a_p.y) > 10) || (abs(p_p.y - a_p.y) > 10))

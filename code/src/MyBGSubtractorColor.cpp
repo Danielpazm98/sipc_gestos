@@ -55,8 +55,6 @@ void MyBGSubtractorColor::Trackbar_func(int, void*)
 void MyBGSubtractorColor::LearnModel() {
 
 
-
-
 		//Creas los frames que vas a usar, y un vector de puntos, que serán las posiciones de los sample.
 	Mat frame, tmp_frame, hls_frame;
 	std::vector<cv::Point> samples_positions;

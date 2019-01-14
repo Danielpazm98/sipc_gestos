@@ -58,9 +58,15 @@ int main(int argc, char** argv)
 	// iniciamos el proceso de obtenci�n del modelo del fondo
 
 
-	vector<Point> trace;			//Historial de puntos, para dibujar
+	//vector<pair<Point, scalar>> trace;			//Historial de puntos y colores, para dibujar
+	vector<pair<Point, Scalar> > trace;
 	Scalar color(0,255,255);	//Color de la traza
 	Point p_p(100,100);				//Punto central previo, para detectar movimiento
+	int i, j, k;
+	i = 0;
+	j = 0;
+	k = 0;
+	bool opt = 0;
 
 	for (;;)
 	{
@@ -97,7 +103,7 @@ int main(int argc, char** argv)
 
 
 		// deteccion de las caracter�sticas de la mano
-								gestures.FeaturesDetection(bgmask, frame, trace, color, p_p);
+								gestures.FeaturesDetection(bgmask, frame, trace, color, p_p, i, j, k, opt);
 
 
               // mostramos el resultado de la sobstracci�n de fondo
