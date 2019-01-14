@@ -158,18 +158,26 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &t
 				}
 
 
-
 				else if(opt == 1){
-						if(k < 245)
+						if(k < 245){
 							k = k + 10;
-						else if((j < 245) && (k > 240))
+							i = 30;
+							j = 30;
+						}
+						else if(j < 245){
 							j = j + 10;
-						else if((i < 245) && (j > 240) && (k > 240))
+							k = 30;
+							i = 30;
+						}
+						else if(i < 245){
 							i = i + 10;
-						else if ((i > 240) && (j > 240) && (k > 240)){
-							i = 0;
-							j = 0;
-							k = 0;
+							j = 30;
+							i = 30;
+						}
+						else if((i > 240) && (j > 240) && (k > 240)){
+							i = 30;
+							j = 30;
+							k = 30;
 						}
 						color = Scalar(i,j,k);
 				}
