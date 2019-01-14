@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	//Abrimos la webcam
 
 	VideoCapture cap;
-	cap.open(0);
+	cap.open(2);
 	if (!cap.isOpened())
 	{
 		printf("\nNo se puede abrir la c�mara\n");
@@ -87,18 +87,18 @@ int main(int argc, char** argv)
                 // limpiar la m�scara del fondo de ruido
                 //...
 										//Filtro de la media
-								medianBlur(bgmask, bgmask, 5);
+								//medianBlur(bgmask, bgmask, 5);
 
 										//Dilata los puntos blancos
 								Mat element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
 								dilate(bgmask, bgmask, element);
 
 										//Erosiona los puntos blancos según el contorno
-								element = getStructuringElement(MORPH_RECT, Size(2 * 2 + 1, 2 * 2 + 1), Point(2, 2));
+								element = getStructuringElement(MORPH_RECT, Size(5 * 2 + 1, 5 * 2 + 1), Point(5, 5));
 								erode(bgmask, bgmask, element);
 
 										//Dilata los puntos blancos
-								element = getStructuringElement(MORPH_RECT, Size(3 * 2 + 1, 3 * 2 + 1), Point(3, 3));
+								element = getStructuringElement(MORPH_RECT, Size(4 * 2 + 1, 4 * 2 + 1), Point(4, 4));
 								dilate(bgmask, bgmask, element);
 
 

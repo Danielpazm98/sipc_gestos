@@ -135,7 +135,7 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &t
 				}
 
 				const string mode = to_string(opt);
-				putText(output_img, mode, Point(200,10), FONT_HERSHEY_SIMPLEX, 1, Scalar(255,255,255), 1, 8, false);
+				putText(output_img, mode, Point(200,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(255,255,255), 1, 8, false);
 
 				if((cont == 3) && opt == 0){		//Si tienes 3 dedos levantados, te cambia el color (rojo, amarillo, cian)
 					Scalar aux1(0,255,255);	//Amarillo
@@ -143,13 +143,17 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &t
 					Scalar aux3(0,0,255);		//Rojo
 
 
-					if((i == 0) && (j == 0)){
+					if(color == aux1){
 						color = Scalar(255,255,0);
+
 						//to_trace.second = Scalar(255,255,0);
 					}
-					else if(i == 0){
-						color = Scalar(0,255,255);
+					else if(color == aux2){
+						color = Scalar(0,0,255);
 						//to_trace.second = Scalar(0,255,255);
+					}
+					else if(color == aux3){
+						color = Scalar(0,255,255);
 					}
 					else{
 						color = Scalar(0,0,255);
@@ -159,27 +163,41 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &t
 
 
 				else if(opt == 1){
+					int aux_i = i;
+					int aux_j = j;
+					int aux_k = k;
+
 						if(k < 245){
 							k = k + 10;
+							aux_k = k;
 							i = 30;
 							j = 30;
+							//putText(output_img, "cambio de color k", Point(100,100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
 						}
 						else if(j < 245){
 							j = j + 10;
-							k = 30;
-							i = 30;
+							aux_j = j;
+
+							aux_i = 30;
+							aux_k = 30;
+
+							//putText(output_img, "cambio de color j", Point(100,100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
 						}
 						else if(i < 245){
 							i = i + 10;
-							j = 30;
-							i = 30;
+							aux_i = i;
+
+							aux_j = 30;
+							aux_k = 30;
+							//putText(output_img, "cambio de color i", Point(100,100), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
+
 						}
 						else if((i > 240) && (j > 240) && (k > 240)){
 							i = 30;
 							j = 30;
 							k = 30;
 						}
-						color = Scalar(i,j,k);
+						color = Scalar(aux_i,aux_j,aux_k);
 				}
 
 
@@ -201,7 +219,7 @@ void HandGesture::FeaturesDetection(Mat mask, Mat output_img, /*vector<Point> &t
 
 						//Comprueba cuánto se ha movido la mano desde el frame anterior, y si es más de 10px, te avisa de que te estés quieto
 				if((abs(p_p.y - a_p.y) > 10) || (abs(p_p.y - a_p.y) > 10))
-					putText(output_img, "Estate quieto", Point(100,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
+					putText(output_img, "Estate quieto", Point(200,30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,0), 1, 8, false);
 
 				p_p = a_p;		//Coloca el piel actual como pixel anterior
 }
